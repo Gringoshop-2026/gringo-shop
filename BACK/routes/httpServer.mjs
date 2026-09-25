@@ -66,4 +66,4 @@ const server = http.createServer(async (req, res) => {
   } catch (error) { return json(res, 500, { error: error.message }) }
 })
 const port = Number(process.env.PORT || 4000)
-server.listen(port, () => console.log(`GringoShop API: http://localhost:${port}`))
+server.listen(port, '0.0.0.0', () => console.log(`GringoShop API: http://0.0.0.0:${port}`))
