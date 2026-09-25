@@ -1,0 +1,26 @@
+{
+  "name": "gringo-shop",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "back": "npm --prefix BACK run dev",
+    "back:start": "npm --prefix BACK run start",
+    "dev:full": "npm run back & npm run dev"
+  },
+  "dependencies": {
+    "@imgly/background-removal": "^1.7.0",
+    "@tailwindcss/vite": "latest",
+    "@vitejs/plugin-react": "latest",
+    "lucide-react": "latest",
+    "onnxruntime-web": "^1.21.0",
+    "react": "latest",
+    "react-dom": "latest",
+    "tailwindcss": "latest",
+    "typescript": "latest",
+    "vite": "latest"
+  }
+}

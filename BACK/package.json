@@ -1,0 +1,6 @@
+{
+  "name": "gringo-shop-back",
+  "private": true,
+  "type": "module",
+  "scripts": { "dev": "node --env-file-if-exists=.env --watch routes/httpServer.mjs", "start": "node --env-file-if-exists=.env routes/httpServer.mjs" }
+}

@@ -1,0 +1,4 @@
+import { useState } from 'react'
+import { Download } from 'lucide-react'
+import { downloadBackup } from '../services/usersApi'
+export default function BackupManagement(){const [message,setMessage]=useState('');const backup=async()=>{try{setMessage('');await downloadBackup();setMessage('Copia descargada correctamente.')}catch(e){setMessage(e instanceof Error?e.message:'No se pudo descargar la copia')}};return <section className="mt-6 rounded-xl border bg-white p-6"><h2 className="font-display text-2xl font-semibold">Copias de seguridad</h2><p className="mt-1 text-sm text-[#68717a]">Descarga una copia de toda la información guardada en SQLite.</p><button onClick={backup} className="mt-5 flex items-center gap-2 rounded-md bg-[#1c2b39] px-4 py-3 text-sm font-bold text-white"><Download size={16}/> Descargar copia SQLite</button>{message&&<p className="mt-3 text-sm font-semibold text-[#315b39]">{message}</p>}</section>}
