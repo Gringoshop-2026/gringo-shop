@@ -1,4 +1,4 @@
-# Gringo Shop — DDD + Clean Architecture
+# NegroShop — DDD + Clean Architecture
 
 - `src/domain`: entidades y reglas de negocio independientes del framework.
 - `src/application`: casos de uso y contratos (puertos) que orquestan el negocio.

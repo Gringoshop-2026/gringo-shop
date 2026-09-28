@@ -1,7 +1,7 @@
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api'
 export async function loginAdmin(username:string,password:string){const response=await fetch(`${API_URL}/auth/login`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({username,password})});const result=await response.json();if(!response.ok)throw new Error(result.error||'No se pudo iniciar sesión');return result}
-export const adminHeaders=()=>{const token=sessionStorage.getItem('gringo-admin-token');return token?{authorization:`Bearer ${token}`}:{}}
-async function adminFetch(input:RequestInfo|URL, init?:RequestInit){const response=await fetch(input,init);if(response.status===401){sessionStorage.removeItem('gringo-admin-auth');sessionStorage.removeItem('gringo-admin-token');window.location.href='/admin'}return response}
+export const adminHeaders=()=>{const token=sessionStorage.getItem('negroshop-admin-token');return token?{authorization:`Bearer ${token}`}:{}}
+async function adminFetch(input:RequestInfo|URL, init?:RequestInit){const response=await fetch(input,init);if(response.status===401){sessionStorage.removeItem('negroshop-admin-auth');sessionStorage.removeItem('negroshop-admin-token');window.location.href='/admin'}return response}
 
 export async function getProducts() {
   const response = await fetch(`${API_URL}/products`)
