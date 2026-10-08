@@ -16,10 +16,12 @@ export default function RealtimeNotifications() {
       return next
     })
   }
-  const activeItems = items.filter(item => item.status === 'reserved' || item.status === 'pending')
-  const pendingCount = activeItems.length
+  const activeItems = items.filter(item => item.status === 'reserved' || item.status === 'pending').slice(0, 5)
+  const pendingCount = pending.orders + pending.quotes
   const attendNotification = (item: any) => {
     setOpen(false)
+    window.location.hash = item.kind === 'Cotización' ? 'cotizaciones' : 'reservas'
+    window.setTimeout(() => {
     const section = document.getElementById(item.kind === 'Cotización' ? 'cotizaciones' : 'reservas')
     const matches = Array.from(section?.querySelectorAll('*') || []).filter(element => element.textContent?.trim() === item.title.trim())
     const textTarget = (matches[0] || Array.from(section?.querySelectorAll('*') || []).filter(element => element.textContent?.includes(item.title)).sort((a, b) => (a.textContent?.length || 0) - (b.textContent?.length || 0))[0]) as HTMLElement | undefined
@@ -31,6 +33,7 @@ export default function RealtimeNotifications() {
       target.classList.add('notification-target-highlight')
       window.setTimeout(() => target.classList.remove('notification-target-highlight'), 2100)
     }
+    }, 80)
   }
   useEffect(() => {
     const check = async () => {
@@ -38,7 +41,7 @@ export default function RealtimeNotifications() {
         const [orders, quotes] = await Promise.all([getOrders(), getQuotes()])
         const next = { orders: orders.filter((item: any) => item.status === 'reserved').length, quotes: quotes.filter((item: any) => item.status === 'pending').length }
         setPending(next)
-        setItems([...orders.map((item: any) => ({ ...item, kind: 'Reserva', title: item.productName })), ...quotes.map((item: any) => ({ ...item, kind: 'Cotización', title: item.name }))].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 3))
+        setItems([...orders.map((item: any) => ({ ...item, kind: 'Reserva', title: item.productName })), ...quotes.map((item: any) => ({ ...item, kind: 'Cotización', title: item.name }))].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()))
         if (initialized.current && next.orders > snapshot.current.orders) setNotice('Nueva reserva recibida.')
         else if (initialized.current && next.quotes > snapshot.current.quotes) setNotice('Nueva cotización recibida.')
         snapshot.current = next
