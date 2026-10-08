@@ -7,7 +7,7 @@ import Dialog from '../../components/Dialog'
 import InstallmentNotice from '../../components/InstallmentNotice'
 import { LanguageSwitcher } from '../../i18n'
 
-export type Product = { id: string; name: string; brand: string; category: string; price: number; referencePrice: number; reservationPercent: number; art: string; tag: string; currencySymbol?: string; image?: string; active?: boolean }
+export type Product = { id: string; name: string; brand: string; category: string; price: number; referencePrice: number; reservationPercent: number; art: string; tag: string; currencySymbol?: string; image?: string; images?: string[]; active?: boolean }
 export const money = (value: number) => value.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 const initialSettings = { reservationPercent: 50, whatsapp: '', currency: 'PEN', welcomeMessage: 'Compra directo de tiendas de Estados Unidos.' }
 

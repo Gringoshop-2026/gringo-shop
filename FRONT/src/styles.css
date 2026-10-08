@@ -389,3 +389,24 @@ h1,h2,h3 { text-wrap:balance; }
 .installment-notice a { flex-shrink:0; font-size:13px; }
 .product-detail .installment-notice { margin-top:18px; padding:16px 0; flex-direction:column; align-items:flex-start; gap:10px; }
 @media(max-width:640px) { .installment-notice { align-items:flex-start; flex-direction:column; gap:12px; } }
+.photo-upload { margin:22px 0; }
+.photo-upload-heading { display:flex; align-items:center; justify-content:space-between; font-size:13px; }
+.photo-upload-heading>span { font-size:12px; color:var(--muted); }
+.photo-upload>p { color:var(--muted); font-size:12px; line-height:1.7; margin-top:7px; }
+.request-form .photo-dropzone { display:flex; align-items:center; flex-wrap:wrap; gap:10px; border:1px dashed #bdc7cd; border-radius:9px; padding:18px; background:#fafbfc; cursor:pointer; font-size:13px; }
+.photo-dropzone>small { margin-left:auto; color:var(--muted); font-size:11px; }
+.request-form .photo-dropzone input { font-size:12px; border:0; padding:0; margin:8px 0 0; }
+.photo-upload-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+.photo-upload-item { position:relative; min-width:0; }
+.photo-upload-item>img { width:100%; aspect-ratio:1; object-fit:contain; border-radius:7px; background:#f1eeea; }
+.photo-upload-item>span { display:block; font-size:11px; color:var(--muted); margin-top:6px; }
+.photo-remove { position:absolute; right:5px; top:5px; display:grid; place-items:center; width:28px; height:28px; border-radius:50%; background:white; color:var(--accent); }
+.photo-cover { display:flex; align-items:center; gap:4px; font-size:10px; color:var(--accent); margin-top:4px; }
+.request-form .photo-background-option { display:flex; align-items:center; gap:10px; font-size:12px; font-weight:400; }
+.request-form .photo-background-option input { width:16px; height:16px; margin:0; accent-color:var(--accent); }
+.product-gallery { min-width:0; background:#f0eeea; }
+.product-detail .product-gallery .product-photo { height:auto; min-height:260px; }
+.gallery-thumbnails { display:flex; flex-wrap:wrap; gap:8px; padding:0 18px 18px; }
+.gallery-thumbnails button { width:48px; height:56px; border:1px solid #d6d4ce; border-radius:6px; background:white; overflow:hidden; }
+.gallery-thumbnails button[aria-pressed='true'] { border:2px solid var(--accent); }
+.gallery-thumbnails img { width:100%; height:100%; object-fit:contain; padding:3px; }
