@@ -9,6 +9,17 @@ const translations = {
 } as const
 
 const englishText: Record<string, string> = {
+  'Tu próxima compra,': 'Your next purchase,',
+  'más cerca.': 'closer to you.',
+  'Reserva tu producto y coordina': 'Reserve your product and arrange',
+  'los detalles por WhatsApp.': 'the details on WhatsApp.',
+  'Coordina tu reserva': 'Arrange your reservation',
+  'Déjanos tus datos y coordinamos los detalles por WhatsApp.': 'Leave your details and we will arrange everything on WhatsApp.',
+  'Recibe tu producto': 'Receive your product',
+  'Te acompañamos hasta la entrega de tu compra.': 'We assist you until your purchase is delivered.',
+  'Precio del producto': 'Product price',
+  'Define la moneda, el mensaje principal y cómo te contactan tus compradores.': 'Set the currency, main message and how buyers contact you.',
+
   '¿Quieres comprar en cuotas?': 'Want to pay in installments?',
   'Comunícate con nosotros por WhatsApp para consultar las opciones.': 'Contact us on WhatsApp to ask about your options.',
   'Consultar por WhatsApp': 'Ask on WhatsApp',
