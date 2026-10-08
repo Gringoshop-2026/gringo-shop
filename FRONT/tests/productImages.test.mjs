@@ -22,3 +22,16 @@ test('preserves standard image formats and rejects other files', () => {
   }
   assert.equal(isSupportedProductPhoto({ type: 'application/pdf', name: 'photo.pdf' }), false)
 })
+
+test('optimizes photos when the browser falls back to large PNG output', async () => {
+  const { optimizeProductImage } = await import('../src/utils/productImages.ts')
+  const originals = { document: globalThis.document, createImageBitmap: globalThis.createImageBitmap, FileReader: globalThis.FileReader }
+  let closed = false
+  globalThis.createImageBitmap = async () => ({ width: 4000, height: 3000, close() { closed = true } })
+  globalThis.document = { createElement() { return { width: 0, height: 0, getContext() { return { drawImage() {} } }, toBlob(callback) { callback(new Blob([new Uint8Array(this.width * this.height * 3)], { type: 'image/png' })) } } } }
+  globalThis.FileReader = class { readAsDataURL(blob) { this.result = `data:${blob.type};base64,TEST`; this.onload() } }
+  try {
+    assert.match(await optimizeProductImage(new Blob([], { type: 'image/png' })), /^data:image\/png/)
+    assert.equal(closed, true)
+  } finally { Object.assign(globalThis, originals) }
+})
