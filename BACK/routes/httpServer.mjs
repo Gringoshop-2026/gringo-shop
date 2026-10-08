@@ -15,7 +15,11 @@ const dataDir = path.join(root, '..', 'data')
 const dbFile = path.join(dataDir, 'db.json')
 const sqliteFile = path.join(dataDir, 'gringo-shop.sqlite')
 const adminSessions = new Map()
-const corsOrigin = process.env.CORS_ORIGIN || '*'
+// The former storefront domain redirects to this canonical NegroShop domain.
+const configuredOrigin = process.env.CORS_ORIGIN || '*'
+const corsOrigin = configuredOrigin === 'https://gringo-shop-4saf.vercel.app'
+  ? 'https://negro-shop-4saf.vercel.app'
+  : configuredOrigin
 const seed = { products: [], quotes: [], orders: [], settings: { reservationPercent: 50, whatsapp: '', currency: 'PEN', welcomeMessage: 'Compra directo de tiendas de Estados Unidos.' } }
 mkdirSync(dataDir, { recursive: true })
 const sqlite = new DatabaseSync(sqliteFile)
