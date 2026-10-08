@@ -48,3 +48,20 @@ export async function optimizeProductImage(source: Blob & { name?: string }): Pr
     return await new Promise<string>((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(String(reader.result)); reader.onerror = () => reject(new Error('No pudimos leer la foto.')); reader.readAsDataURL(blob) })
   } finally { bitmap.close() }
 }
+
+export async function removeProductPhotoBackgrounds(images: string[]): Promise<string[]> {
+  if (!images.length) return []
+  const { removeBackground } = await import('@imgly/background-removal')
+  const photos: string[] = []
+  for (let index = 0; index < images.length; index++) {
+    try {
+      const response = await fetch(images[index])
+      if (!response.ok) throw new Error('No se pudo cargar la imagen')
+      const cutout = await removeBackground(await response.blob())
+      photos.push(await optimizeProductImage(cutout))
+    } catch {
+      throw new Error(`No pudimos quitar el fondo de la foto ${index + 1}. Intenta nuevamente.`)
+    }
+  }
+  return photos
+}
