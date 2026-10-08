@@ -2,8 +2,25 @@ export const MAX_PRODUCT_PHOTOS = 6
 export const MAX_PHOTO_BYTES = 10 * 1024 * 1024
 const MAX_OPTIMIZED_BYTES = 1024 * 1024
 
-export async function optimizeProductImage(source: Blob): Promise<string> {
-  const bitmap = await createImageBitmap(source, { imageOrientation: 'from-image' })
+export function isHeicPhoto(source: Blob & { name?: string }): boolean {
+  return /^image\/(heic|heif)(-sequence)?$/i.test(source.type) || /\.hei[cf]$/i.test(source.name || '')
+}
+
+export function isSupportedProductPhoto(source: Blob & { name?: string }): boolean {
+  return ['image/png', 'image/jpeg', 'image/webp'].includes(source.type) || isHeicPhoto(source)
+}
+
+export async function optimizeProductImage(source: Blob & { name?: string }): Promise<string> {
+  let decoded = source
+  if (isHeicPhoto(source)) {
+    try {
+      const { heicTo } = await import('heic-to/csp')
+      decoded = await heicTo({ blob: source, type: 'image/jpeg', quality: .95 })
+    } catch {
+      throw new Error('No pudimos convertir esta foto HEIC. Intenta con otra foto o expórtala como JPG.')
+    }
+  }
+  const bitmap = await createImageBitmap(decoded, { imageOrientation: 'from-image' })
   try {
     const scale = Math.min(1, 1600 / Math.max(bitmap.width, bitmap.height))
     const canvas = document.createElement('canvas')
