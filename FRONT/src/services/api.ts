@@ -1,23 +1,27 @@
+import { createCatalogLoader } from './catalogLoader'
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api'
 export async function loginAdmin(username:string,password:string){const response=await fetch(`${API_URL}/auth/login`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({username,password})});const result=await response.json();if(!response.ok)throw new Error(result.error||'No se pudo iniciar sesión');return result}
 export const adminHeaders=()=>{const token=sessionStorage.getItem('negroshop-admin-token');return token?{authorization:`Bearer ${token}`}:{}}
 async function adminFetch(input:RequestInfo|URL, init?:RequestInit){const response=await fetch(input,init);if(response.status===401){sessionStorage.removeItem('negroshop-admin-auth');sessionStorage.removeItem('negroshop-admin-token');window.location.href='/admin'}return response}
 
-export async function getProducts() {
-  const response = await fetch(`${API_URL}/products`)
+const catalogLoader = createCatalogLoader(async () => {
+  const response = await fetch(`${API_URL}/products`, { signal: AbortSignal.timeout(45_000) })
   if (!response.ok) throw new Error('No pudimos cargar el catálogo')
-  return response.json()
-}
+  const products = await response.json()
+  if (!Array.isArray(products)) throw new Error('El catálogo devolvió una respuesta inválida')
+  return products
+})
+export const getProducts = () => catalogLoader.load()
 export async function getCategories(): Promise<string[]> { const response = await fetch(`${API_URL}/categories`); if (!response.ok) throw new Error('No pudimos cargar las categorías'); return response.json() }
-export async function getSettings() { const response = await fetch(`${API_URL}/settings`); if (!response.ok) throw new Error('No pudimos cargar la configuración'); return response.json() }
+export async function getSettings() { const response = await fetch(`${API_URL}/settings`, {signal:AbortSignal.timeout(15_000)}); if (!response.ok) throw new Error('No pudimos cargar la configuración'); return response.json() }
 export async function updateSettings(payload: { reservationPercent?: number; whatsapp: string; currency: string; welcomeMessage: string }) { const response = await adminFetch(`${API_URL}/settings`, { method:'PATCH', headers:{'content-type':'application/json',...adminHeaders()}, body:JSON.stringify(payload) }); const result = await response.json(); if (!response.ok) throw new Error(result.error || 'No pudimos guardar la configuración'); return result }
 
 export async function getOrders() { const response = await adminFetch(`${API_URL}/orders`, { headers: adminHeaders() }); if (!response.ok) throw new Error('No pudimos cargar las reservas'); return response.json() }
 export async function getOrdersByPhone(phone:string) { const response = await fetch(`${API_URL}/orders?phone=${encodeURIComponent(phone)}`); if (!response.ok) throw new Error('No pudimos consultar tus reservas'); return response.json() }
 export async function getCustomers() { const response = await adminFetch(`${API_URL}/customers`, { headers: adminHeaders() }); if (!response.ok) throw new Error('No pudimos cargar los clientes'); return response.json() }
 export async function getQuotes() { const response = await adminFetch(`${API_URL}/quotes`, { headers: adminHeaders() }); if (!response.ok) throw new Error('No pudimos cargar las cotizaciones'); return response.json() }
-export async function createProduct(payload: { name:string; brand:string; category:string; price:number; referencePrice:number; image?:string; images?:string[] }) { const response = await adminFetch(`${API_URL}/products`, { method:'POST', headers:{'content-type':'application/json',...adminHeaders()}, body:JSON.stringify(payload) }); if (!response.ok) throw new Error('No pudimos publicar el producto'); return response.json() }
-export async function updateProduct(id:string, payload: { name?:string; brand?:string; category?:string; price?:number; referencePrice?:number; active?:boolean; image?:string; images?:string[] }) { const response = await adminFetch(`${API_URL}/products/${id}`, { method:'PATCH', headers:{'content-type':'application/json',...adminHeaders()}, body:JSON.stringify(payload) }); if (!response.ok) throw new Error('No pudimos actualizar el producto'); return response.json() }
+export async function createProduct(payload: { name:string; brand:string; category:string; price:number; referencePrice:number; image?:string; images?:string[] }) { const response = await adminFetch(`${API_URL}/products`, { method:'POST', headers:{'content-type':'application/json',...adminHeaders()}, body:JSON.stringify(payload) }); if (!response.ok) throw new Error('No pudimos publicar el producto'); catalogLoader.invalidate(); return response.json() }
+export async function updateProduct(id:string, payload: { name?:string; brand?:string; category?:string; price?:number; referencePrice?:number; active?:boolean; image?:string; images?:string[] }) { const response = await adminFetch(`${API_URL}/products/${id}`, { method:'PATCH', headers:{'content-type':'application/json',...adminHeaders()}, body:JSON.stringify(payload) }); if (!response.ok) throw new Error('No pudimos actualizar el producto'); catalogLoader.invalidate(); return response.json() }
 export async function updateOrderStatus(id: string, status: 'confirmed'|'cancelled') { const response = await adminFetch(`${API_URL}/orders/${id}`, { method:'PATCH', headers:{'content-type':'application/json',...adminHeaders()}, body:JSON.stringify({ status }) }); if (!response.ok) throw new Error('No pudimos actualizar la reserva'); return response.json() }
 export async function updateQuoteStatus(id: string, status: 'contacted'|'closed') { const response = await adminFetch(`${API_URL}/quotes/${id}`, { method:'PATCH', headers:{'content-type':'application/json',...adminHeaders()}, body:JSON.stringify({ status }) }); if (!response.ok) throw new Error('No pudimos actualizar la cotización'); return response.json() }
 

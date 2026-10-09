@@ -18,8 +18,13 @@ export default function ProductManagement() {
   const [editImages,setEditImages]=useState<string[]>([])
   const [processingPhotos,setProcessingPhotos]=useState(false)
   const [symbol,setSymbol]=useState('S/')
-  const load=async()=>{const [items,settings]=await Promise.all([getProducts(),getSettings()]);setProducts(items);setSymbol(settings.currency==='USD'?'$':'S/');setError('')}
-  useEffect(()=>{load().catch(()=>setError('No pudimos cargar los productos. Intenta nuevamente.')).finally(()=>setLoading(false))},[])
+  const load=async()=>{
+    setLoading(true)
+    try { const items=await getProducts();setProducts(items);setError('') }
+    catch { setError('No pudimos cargar los productos. Revisa tu conexión y vuelve a intentarlo.') }
+    finally { setLoading(false) }
+  }
+  useEffect(()=>{void load();void getSettings().then(settings=>setSymbol(settings.currency==='USD'?'$':'S/')).catch(()=>{})},[])
   const save=async(event:FormEvent<HTMLFormElement>)=>{event.preventDefault();if(!editing||busy||processingPhotos)return;const form=new FormData(event.currentTarget);setPhotoProgress('');setBusy(editing.id);setSaveError('');try{const photos=await removeProductPhotoBackgrounds(editImages,(done,total)=>setPhotoProgress(done<total?`Procesando foto ${done+1} de ${total}…`:'Guardando…'));await updateProduct(editing.id,{name:String(form.get('name')).trim(),brand:String(form.get('brand')).trim(),price:Number(form.get('price')),referencePrice:Number(form.get('referencePrice')),images:photos,image:photos[0]||''});setEditing(null);setMessage('Producto actualizado.');await load()}catch(failure){setSaveError(failure instanceof Error?failure.message:'No pudimos guardar los cambios. Intenta nuevamente.')}finally{setBusy(null)}}
   const toggle=async(product:Product)=>{setBusy(product.id);try{await updateProduct(product.id,{active:product.active===false});await load();setMessage(product.active===false?'Producto reactivado.':'Producto ocultado.')}catch{setError('No pudimos cambiar la visibilidad. Intenta nuevamente.')}finally{setBusy(null)}}
   const visible=products.filter(p=>`${p.name} ${p.brand} ${p.category}`.toLowerCase().includes(query.toLowerCase()))
