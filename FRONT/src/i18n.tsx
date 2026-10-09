@@ -29,8 +29,8 @@ const englishText: Record<string, string> = {
   'Precio del producto': 'Product price',
   'Define la moneda, el mensaje principal y cómo te contactan tus compradores.': 'Set the currency, main message and how buyers contact you.',
 
-  '¿Quieres comprar en cuotas?': 'Want to pay in installments?',
-  'Comunícate con nosotros por WhatsApp para consultar las opciones.': 'Contact us on WhatsApp to ask about your options.',
+  'Coordina con nosotros los distintos medios de pago': 'Arrange your payment method with us',
+  'Escríbenos por WhatsApp y te ayudamos a elegir cómo pagar tu compra.': 'Message us on WhatsApp and we will help you choose how to pay for your purchase.',
   'Consultar por WhatsApp': 'Ask on WhatsApp',
   'Catálogo': 'Catalog', 'Cómo funciona': 'How it works', 'Mis reservas': 'My reservations',
   'Cotizar': 'Get a quote', 'Buscar producto': 'Search product', 'Control general': 'Dashboard',
