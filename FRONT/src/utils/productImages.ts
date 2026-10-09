@@ -1,3 +1,4 @@
+import { cachedPhoto } from './photoCache.ts'
 export const MAX_PRODUCT_PHOTOS = 6
 export const MAX_PHOTO_BYTES = 10 * 1024 * 1024
 const MAX_OPTIMIZED_BYTES = 1024 * 1024
@@ -49,16 +50,26 @@ export async function optimizeProductImage(source: Blob & { name?: string }): Pr
   } finally { bitmap.close() }
 }
 
-export async function removeProductPhotoBackgrounds(images: string[]): Promise<string[]> {
+let engine: Promise<typeof import('@imgly/background-removal')> | undefined
+export function preparePhotoBackgroundRemoval() {
+  engine ??= import('@imgly/background-removal')
+  void engine.then(module => module.preload()).catch(() => { engine = undefined })
+}
+
+export async function removeProductPhotoBackgrounds(images: string[], onProgress?: (done: number, total: number) => void): Promise<string[]> {
   if (!images.length) return []
-  const { removeBackground } = await import('@imgly/background-removal')
   const photos: string[] = []
   for (let index = 0; index < images.length; index++) {
     try {
-      const response = await fetch(images[index])
-      if (!response.ok) throw new Error('No se pudo cargar la imagen')
-      const cutout = await removeBackground(await response.blob())
-      photos.push(await optimizeProductImage(cutout))
+      onProgress?.(index, images.length)
+      photos.push(await cachedPhoto(images[index], async image => {
+        engine ??= import('@imgly/background-removal')
+        const { removeBackground } = await engine
+        const response = await fetch(image)
+        if (!response.ok) throw new Error('No se pudo cargar la imagen')
+        return optimizeProductImage(await removeBackground(await response.blob()))
+      }))
+      onProgress?.(index + 1, images.length)
     } catch {
       throw new Error(`No pudimos quitar el fondo de la foto ${index + 1}. Intenta nuevamente.`)
     }
