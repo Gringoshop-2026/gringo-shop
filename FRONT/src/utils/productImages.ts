@@ -1,3 +1,4 @@
+import { photoProcessingError } from './photoErrors.ts'
 import { cachedPhoto } from './photoCache.ts'
 export const MAX_PRODUCT_PHOTOS = 6
 export const MAX_PHOTO_BYTES = 10 * 1024 * 1024
@@ -60,18 +61,26 @@ export async function removeProductPhotoBackgrounds(images: string[], onProgress
   if (!images.length) return []
   const photos: string[] = []
   for (let index = 0; index < images.length; index++) {
+    let stage = 'la recuperación de la foto procesada'
     try {
       onProgress?.(index, images.length)
       photos.push(await cachedPhoto(images[index], async image => {
+        stage = 'la carga del motor de recorte'
         engine ??= import('@imgly/background-removal')
         const { removeBackground } = await engine
+        stage = 'la lectura de la imagen'
         const response = await fetch(image)
         if (!response.ok) throw new Error('No se pudo cargar la imagen')
-        return optimizeProductImage(await removeBackground(await response.blob()))
+        const source = await response.blob()
+        stage = 'la eliminación del fondo'
+        const cutout = await removeBackground(source)
+        stage = 'la optimización de la foto recortada'
+        return await optimizeProductImage(cutout)
       }))
       onProgress?.(index + 1, images.length)
-    } catch {
-      throw new Error(`No pudimos quitar el fondo de la foto ${index + 1}. Intenta nuevamente.`)
+    } catch (failure) {
+      engine = undefined
+      throw new Error(photoProcessingError(failure, index + 1, stage))
     }
   }
   return photos
