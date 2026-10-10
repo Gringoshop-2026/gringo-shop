@@ -9,6 +9,16 @@ const translations = {
 } as const
 
 const englishText: Record<string, string> = {
+  'Ampliar foto': 'Enlarge photo',
+  'Ampliar foto del producto': 'Enlarge product photo',
+  'Cerrar imagen ampliada': 'Close enlarged image',
+  'Foto anterior': 'Previous photo',
+  'Foto siguiente': 'Next photo',
+  'Reducir zoom': 'Zoom out',
+  'Aumentar zoom': 'Zoom in',
+  'Restablecer zoom': 'Reset zoom',
+  'Imagen ampliada. Desplázate para ver los detalles.': 'Enlarged image. Scroll to see the details.',
+
   'Reservar por WhatsApp': 'Reserve on WhatsApp',
   'Cotizar por WhatsApp': 'Get a quote on WhatsApp',
   'Contacto': 'Contact',

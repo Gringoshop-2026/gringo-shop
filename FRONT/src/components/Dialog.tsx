@@ -1,6 +1,6 @@
 import { useEffect, useRef, type ReactNode } from 'react'
 
-export default function Dialog({ children, onClose, label }: { children: ReactNode; onClose: () => void; label: string }) {
+export default function Dialog({ children, onClose, label, className = '' }: { children: ReactNode; onClose: () => void; label: string; className?: string }) {
   const ref = useRef<HTMLDialogElement>(null)
   useEffect(() => {
     const previous = document.activeElement as HTMLElement | null
@@ -14,5 +14,5 @@ export default function Dialog({ children, onClose, label }: { children: ReactNo
       previous?.focus()
     }
   }, [])
-  return <dialog ref={ref} className="shop-dialog" aria-label={label} onCancel={event => { event.preventDefault(); onClose() }} onClick={event => { if (event.target === event.currentTarget) onClose() }}>{children}</dialog>
+  return <dialog ref={ref} className={`shop-dialog ${className}`} aria-label={label} onCancel={event => { event.preventDefault(); onClose() }} onClick={event => { if (event.target === event.currentTarget) onClose() }}>{children}</dialog>
 }
