@@ -1,3 +1,4 @@
+import { deliverProduct, productPhotos, decodeProductPhoto, photoVersion } from '../application/catalog/DeliverCatalog.mjs'
 import http from 'node:http'
 import { readFile, writeFile, mkdir } from 'node:fs/promises'
 import { existsSync, mkdirSync, readFileSync } from 'node:fs'
@@ -11,7 +12,7 @@ import { changeQuoteStatus, createQuote } from '../domain/entities/Quote.mjs'
 import { changeOrderStatus } from '../domain/entities/Order.mjs'
 
 const root = path.dirname(fileURLToPath(import.meta.url))
-const dataDir = path.join(root, '..', 'data')
+const dataDir = process.env.RAILWAY_VOLUME_MOUNT_PATH || path.join(root, '..', 'data')
 const dbFile = path.join(dataDir, 'db.json')
 const sqliteFile = path.join(dataDir, 'gringo-shop.sqlite')
 const adminSessions = new Map()
@@ -29,11 +30,34 @@ function verifyPassword(password, stored) { const [salt,hash]=stored.split(':');
 if (!sqlite.prepare('SELECT id FROM users LIMIT 1').get()) sqlite.prepare('INSERT INTO users (id,username,password_hash,role,created_at) VALUES (?,?,?,?,?)').run(randomUUID(), process.env.ADMIN_USER || 'admin', hashPassword(process.env.ADMIN_PASSWORD || 'negro2026'), 'admin', new Date().toISOString())
 if (sqlite.prepare('SELECT COUNT(*) AS count FROM products').get().count === 0 && existsSync(dbFile)) { try { const legacy = JSON.parse(readFileSync(dbFile, 'utf8')); const insertProduct=sqlite.prepare('INSERT OR IGNORE INTO products (id,data) VALUES (?,?)'); for (const item of legacy.products||[]) insertProduct.run(item.id, JSON.stringify(item)); const insertOrder=sqlite.prepare('INSERT OR IGNORE INTO orders (id,data) VALUES (?,?)'); for (const item of legacy.orders||[]) insertOrder.run(item.id, JSON.stringify(item)); const insertQuote=sqlite.prepare('INSERT OR IGNORE INTO quotes (id,data) VALUES (?,?)'); for (const item of legacy.quotes||[]) insertQuote.run(item.id, JSON.stringify(item)); const settings={...seed.settings,...(legacy.settings||{})}; sqlite.prepare('INSERT OR REPLACE INTO settings (key,value) VALUES (?,?)').run('store',JSON.stringify(settings)) } catch {} }
 if (!sqlite.prepare('SELECT value FROM settings WHERE key = ?').get('store')) sqlite.prepare('INSERT INTO settings (key,value) VALUES (?,?)').run('store', JSON.stringify(seed.settings))
-function db() { const read=(table)=>sqlite.prepare(`SELECT data FROM ${table}`).all().map(row=>JSON.parse(row.data)); const settings=JSON.parse(sqlite.prepare('SELECT value FROM settings WHERE key = ?').get('store').value); return { products:read('products'), quotes:read('quotes'), orders:read('orders'), settings } }
-function save(data) { const replace=(table,items)=>{sqlite.prepare(`DELETE FROM ${table}`).run(); const insert=sqlite.prepare(`INSERT INTO ${table} (id,data) VALUES (?,?)`); for(const item of items) insert.run(item.id,JSON.stringify(item))}; replace('products',data.products); replace('orders',data.orders); replace('quotes',data.quotes); sqlite.prepare('INSERT OR REPLACE INTO settings (key,value) VALUES (?,?)').run('store',JSON.stringify(data.settings||seed.settings)); return data }
+let cachedData
+function db() { if (cachedData) return cachedData; const read=(table)=>sqlite.prepare(`SELECT data FROM ${table}`).all().map(row=>JSON.parse(row.data)); const settings=JSON.parse(sqlite.prepare('SELECT value FROM settings WHERE key = ?').get('store').value); return cachedData={products:read('products'),quotes:read('quotes'),orders:read('orders'),settings} }
+function save(data, users) {
+  sqlite.exec('BEGIN IMMEDIATE')
+  try {
+    for (const table of ['products','orders','quotes']) {
+      sqlite.prepare(`DELETE FROM ${table}`).run()
+      const insert=sqlite.prepare(`INSERT INTO ${table} (id,data) VALUES (?,?)`)
+      for(const item of data[table]) insert.run(item.id,JSON.stringify(item))
+    }
+    sqlite.prepare('INSERT OR REPLACE INTO settings (key,value) VALUES (?,?)').run('store',JSON.stringify(data.settings||seed.settings))
+    if (users) {
+      sqlite.prepare('DELETE FROM users').run()
+      const insert=sqlite.prepare('INSERT INTO users (id,username,password_hash,role,active,created_at) VALUES (?,?,?,?,?,?)')
+      for(const user of users) insert.run(user.id,user.username,user.password_hash,user.role,user.active,user.created_at)
+    }
+    sqlite.exec('COMMIT');cachedData=data;return data
+  } catch(error) { sqlite.exec('ROLLBACK');cachedData=undefined;throw error }
+}
+const deliveredProducts = new WeakMap()
+function catalogProduct(product, baseUrl) {
+  const previous=deliveredProducts.get(product)
+  if(previous?.baseUrl===baseUrl)return previous.value
+  const value=deliverProduct(product,baseUrl);deliveredProducts.set(product,{baseUrl,value});return value
+}
 function json(res, status, body) { res.writeHead(status, { 'content-type': 'application/json', 'access-control-allow-origin': corsOrigin, 'access-control-allow-methods': 'GET,POST,PATCH,OPTIONS', 'access-control-allow-headers': 'content-type, authorization' }); res.end(JSON.stringify(body)) }
-async function body(req) { let raw=''; for await (const chunk of req) { raw += chunk; if (Buffer.byteLength(raw) > 16 * 1024 * 1024) throw new Error('La solicitud supera el límite de 16 MB'); } return raw ? JSON.parse(raw) : {} }
-function isAdminRoute(url, req) { return ( (url.pathname === '/api/settings' && req.method === 'PATCH') || (url.pathname === '/api/backup' && req.method === 'GET') || (url.pathname === '/api/me/password' && req.method === 'PATCH') || (url.pathname === '/api/users' && ['GET','POST'].includes(req.method)) || (url.pathname.startsWith('/api/users/') && req.method === 'PATCH') || (url.pathname === '/api/customers' && req.method === 'GET') || (url.pathname === '/api/orders' && req.method === 'GET' && !url.searchParams.has('phone')) || (url.pathname === '/api/quotes' && req.method === 'GET') || (url.pathname === '/api/products' && req.method === 'POST') || (url.pathname.startsWith('/api/products/') && req.method === 'PATCH') || (url.pathname.startsWith('/api/orders/') && req.method === 'PATCH') || (url.pathname.startsWith('/api/quotes/') && req.method === 'PATCH') ) }
+async function body(req, limit = 16 * 1024 * 1024) { let raw=''; for await (const chunk of req) { raw += chunk; if (Buffer.byteLength(raw) > limit) throw new Error('La solicitud supera el límite de 16 MB'); } return raw ? JSON.parse(raw) : {} }
+function isAdminRoute(url, req) { return ( (url.pathname === '/api/settings' && req.method === 'PATCH') || (url.pathname === '/api/backup' && req.method === 'GET') || (url.pathname === '/api/restore' && req.method === 'POST') || (url.pathname === '/api/me/password' && req.method === 'PATCH') || (url.pathname === '/api/users' && ['GET','POST'].includes(req.method)) || (url.pathname.startsWith('/api/users/') && req.method === 'PATCH') || (url.pathname === '/api/customers' && req.method === 'GET') || (url.pathname === '/api/orders' && req.method === 'GET' && !url.searchParams.has('phone')) || (url.pathname === '/api/quotes' && req.method === 'GET') || (url.pathname === '/api/products' && req.method === 'POST') || (url.pathname.startsWith('/api/products/') && req.method === 'PATCH') || (url.pathname.startsWith('/api/orders/') && req.method === 'PATCH') || (url.pathname.startsWith('/api/quotes/') && req.method === 'PATCH') ) }
 function adminSession(req) { const value = req.headers.authorization || ''; return value.startsWith('Bearer ') ? adminSessions.get(value.slice(7)) : null }
 function hasAdminToken(req) { return Boolean(adminSession(req)) }
 
@@ -52,10 +76,35 @@ const server = http.createServer(async (req, res) => {
     if (req.method === 'POST' && url.pathname === '/api/users') { const input=await body(req); const username=String(input.username||'').trim(); const password=String(input.password||''); const role=input.role==='editor'?'editor':'admin'; if(!/^[a-zA-Z0-9._-]{3,30}$/.test(username)) return json(res,400,{error:'El usuario debe tener entre 3 y 30 caracteres.'}); if(password.length<8) return json(res,400,{error:'La contraseña debe tener al menos 8 caracteres.'}); try { const user={id:randomUUID(),username,password_hash:hashPassword(password),role,active:1,created_at:new Date().toISOString()}; sqlite.prepare('INSERT INTO users (id,username,password_hash,role,active,created_at) VALUES (?,?,?,?,?,?)').run(user.id,user.username,user.password_hash,user.role,user.active,user.created_at); return json(res,201,{id:user.id,username:user.username,role:user.role,active:true,createdAt:user.created_at}) } catch { return json(res,409,{error:'Ese usuario ya existe.'}) }
     }
     if (req.method === 'PATCH' && url.pathname.startsWith('/api/users/')) { const id=url.pathname.split('/').pop(); const input=await body(req); const current=sqlite.prepare('SELECT id,username,role,active FROM users WHERE id=?').get(id); if(!current)return json(res,404,{error:'Usuario no encontrado.'}); if(id===adminSession(req)?.userId&&input.active===false)return json(res,400,{error:'No puedes desactivar tu propio usuario.'}); const role=input.role==='editor'?'editor':input.role==='admin'?'admin':current.role; const active=input.active===undefined?current.active:(input.active?1:0); if(input.password!==undefined&&String(input.password).length<8)return json(res,400,{error:'La contraseña debe tener al menos 8 caracteres.'}); const passwordHash=input.password?hashPassword(String(input.password)):undefined; sqlite.prepare(`UPDATE users SET role=?, active=?${passwordHash?', password_hash=?':''} WHERE id=?`).run(...(passwordHash?[role,active,passwordHash,id]:[role,active,id])); return json(res,200,{...current,role,active:Boolean(active)}) }
+    if (req.method === 'POST' && url.pathname === '/api/restore') {
+      if (adminSession(req)?.role !== 'admin') return json(res,403,{error:'Solo un administrador puede restaurar datos.'})
+      const input=await body(req,128*1024*1024)
+      for(const table of ['products','orders','quotes']) {
+        if(!Array.isArray(input[table])||input[table].some(item=>!item||typeof item.id!=='string')||new Set(input[table].map(item=>item.id)).size!==input[table].length)return json(res,400,{error:'Respaldo inválido.'})
+      }
+      if(!input.settings||!Array.isArray(input.users)||!input.users.length||input.users.some(user=>typeof user.id!=='string'||typeof user.username!=='string'||typeof user.password_hash!=='string'||!['admin','editor'].includes(user.role)||![0,1].includes(user.active)||typeof user.created_at!=='string'))return json(res,400,{error:'Respaldo inválido.'})
+      const current=db()
+      if(current.products.length||current.orders.length||current.quotes.length)return json(res,409,{error:'La restauración solo está disponible para una base vacía.'})
+      save({products:input.products,orders:input.orders,quotes:input.quotes,settings:input.settings},input.users)
+      adminSessions.clear()
+      return json(res,200,{restored:true,products:input.products.length,orders:input.orders.length,quotes:input.quotes.length,users:input.users.length})
+    }
+    const imageMatch=/^\/api\/products\/([^/]+)\/images\/(\d+)$/.exec(url.pathname)
+    if(req.method==='GET'&&imageMatch) {
+      const product=data.products.find(item=>item.id===decodeURIComponent(imageMatch[1]))
+      const photo=product&&productPhotos(product)[Number(imageMatch[2])]
+      if(!photo)return json(res,404,{error:'Foto no encontrada'})
+      const decoded=decodeProductPhoto(photo)
+      if(!decoded)return json(res,400,{error:'Formato de foto inválido'})
+      const version=photoVersion(photo)
+      const headers={'content-type':decoded.type,'access-control-allow-origin':corsOrigin,'cache-control':url.searchParams.get('v')===version?'public, max-age=31536000, immutable':'no-cache','etag':`"${version}"`}
+      if(req.headers['if-none-match']===headers.etag){res.writeHead(304,headers);return res.end()}
+      res.writeHead(200,headers);return res.end(decoded.bytes)
+    }
     if (req.method === 'GET' && url.pathname === '/api/health') return json(res, 200, { ok: true, service: 'negroshop-back' })
     if (req.method === 'GET' && url.pathname === '/api/settings') return json(res, 200, { ...seed.settings, ...(data.settings || {}) })
     if (req.method === 'PATCH' && url.pathname === '/api/settings') { const input = await body(req); const current = { ...seed.settings, ...(data.settings || {}) }; const next = { ...current, reservationPercent: Number(input.reservationPercent ?? current.reservationPercent), whatsapp: String(input.whatsapp ?? current.whatsapp).replace(/\D/g, '').slice(0, 9), currency: String(input.currency ?? current.currency), welcomeMessage: String(input.welcomeMessage ?? current.welcomeMessage).trim() }; if (next.reservationPercent < 1 || next.reservationPercent > 100) return json(res, 400, { error: 'El adelanto debe estar entre 1 y 100.' }); if (next.whatsapp && !/^9\d{8}$/.test(next.whatsapp)) return json(res, 400, { error: 'El WhatsApp debe tener 9 dígitos y comenzar con 9.' }); data.settings = next; await save(data); return json(res, 200, next) }
-    if (req.method === 'GET' && url.pathname === '/api/products') return json(res, 200, data.products)
+    if (req.method === 'GET' && url.pathname === '/api/products') return json(res, 200, url.searchParams.get('view')==='summary' ? data.products.map(product=>catalogProduct(product,`${req.headers['x-forwarded-proto']==='https'?'https':'http'}://${req.headers.host}`)) : data.products)
     if (req.method === 'GET' && url.pathname === '/api/categories') return json(res, 200, [...new Set(data.products.filter(product => product.active !== false).map(product => product.category).filter(Boolean))].sort())
     if (req.method === 'POST' && url.pathname === '/api/products') { const product = createProduct(await body(req)); data.products.push(product); await save(data); return json(res, 201, product) }
     if (req.method === 'PATCH' && url.pathname.startsWith('/api/products/')) { const id = url.pathname.split('/').pop(); const input = await body(req); const index = data.products.findIndex(product => product.id === id); if (index < 0) return json(res, 404, { error: 'Producto no encontrado' }); const photos = input.images !== undefined || input.image !== undefined ? normalizeProductImages(input) : null; data.products[index] = { ...data.products[index], ...input, ...(photos ? {images:photos,image:photos[0]||''} : {}), id, price: input.price === undefined ? data.products[index].price : Number(input.price), referencePrice: input.referencePrice === undefined ? data.products[index].referencePrice : Number(input.referencePrice), updatedAt: new Date().toISOString() }; await save(data); return json(res, 200, data.products[index]) }

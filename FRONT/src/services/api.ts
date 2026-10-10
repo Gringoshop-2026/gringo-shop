@@ -5,7 +5,7 @@ export const adminHeaders=()=>{const token=sessionStorage.getItem('negroshop-adm
 async function adminFetch(input:RequestInfo|URL, init?:RequestInit){const response=await fetch(input,init);if(response.status===401){sessionStorage.removeItem('negroshop-admin-auth');sessionStorage.removeItem('negroshop-admin-token');window.location.href='/admin'}return response}
 
 const catalogLoader = createCatalogLoader(async () => {
-  const response = await fetch(`${API_URL}/products`, { signal: AbortSignal.timeout(45_000) })
+  const response = await fetch(`${API_URL}/products?view=summary`, { signal: AbortSignal.timeout(45_000) })
   if (!response.ok) throw new Error('No pudimos cargar el catálogo')
   const products = await response.json()
   if (!Array.isArray(products)) throw new Error('El catálogo devolvió una respuesta inválida')
