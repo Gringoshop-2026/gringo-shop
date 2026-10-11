@@ -9,6 +9,7 @@ const translations = {
 } as const
 
 const englishText: Record<string, string> = {
+  'Crédito directo': 'Direct credit',
   'Ampliar foto': 'Enlarge photo',
   'Ampliar foto del producto': 'Enlarge product photo',
   'Cerrar imagen ampliada': 'Close enlarged image',

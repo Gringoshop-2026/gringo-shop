@@ -428,3 +428,10 @@ h1,h2,h3 { text-wrap:balance; }
 .image-zoom-viewport img{width:100%;height:100%;max-width:none;object-fit:contain;padding:12px;}
 .image-zoom-controls{display:flex;align-items:center;justify-content:center;gap:16px;padding:10px;border-top:1px solid #ded8ce;}
 .image-zoom-scale{display:flex;align-items:center;gap:8px;}
+
+.payment-methods { display:flex; align-items:center; flex-wrap:wrap; gap:20px; list-style:none; padding:0; margin:14px 0 0; }
+.payment-methods li { display:flex; align-items:center; justify-content:center; min-height:36px; }
+.payment-methods img { display:block; object-fit:contain; width:36px; height:36px; }
+.payment-methods img.payment-visa { width:52px; height:17px; }
+.payment-methods .payment-credit { gap:8px; color:var(--ink); font-size:12px; font-weight:600; }
+.payment-credit span { max-width:60px; line-height:1.3; }
