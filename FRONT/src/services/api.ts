@@ -41,3 +41,18 @@ export async function createOrder(payload: { productId?: string; productName: st
   if (!response.ok) throw new Error('No pudimos crear la reserva')
   return response.json()
 }
+
+export async function getVisitStats(days:number) {
+  const response=await adminFetch(`${API_URL}/analytics?days=${days}`,{headers:adminHeaders(),signal:AbortSignal.timeout(15000)})
+  if(!response.ok)throw new Error('No pudimos cargar las estadísticas. Intenta nuevamente.')
+  return response.json()
+}
+export function recordVisit() {
+  if(!import.meta.env.PROD||window.location.pathname.startsWith('/admin'))return
+  try {
+    const key='negroshop-visitor'
+    let visitor=localStorage.getItem(key)
+    if(!visitor){visitor=crypto.randomUUID();localStorage.setItem(key,visitor)}
+    void fetch(`${API_URL}/visits`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({visitor}),keepalive:true}).catch(()=>{})
+  } catch { /* Browsing still works when storage is blocked. */ }
+}

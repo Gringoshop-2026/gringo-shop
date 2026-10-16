@@ -15,6 +15,11 @@ test('catalog separates photos, serves cacheable image bytes and protects restor
   for(let i=0;i<100;i++){try{if((await fetch(base+'/health')).ok)break}catch{}await new Promise(r=>setTimeout(r,25))}
   const auth=await(await fetch(base+'/auth/login',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({username:'test',password:'test-password'})})).json()
   const headers={'content-type':'application/json',authorization:`Bearer ${auth.token}`}
+  assert.equal((await fetch(base+'/analytics')).status,401)
+  assert.equal((await fetch(base+'/visits',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({visitor:'invalid'})})).status,400)
+  for(let i=0;i<2;i++)assert.equal((await fetch(base+'/visits',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({visitor:'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'})})).status,202)
+  const visits=await(await fetch(base+'/analytics?days=7',{headers})).json()
+  assert.equal(visits.visitors,1);assert.equal(visits.views,2);assert.equal(visits.daily.length,7)
   const image='data:image/png;base64,'+Buffer.alloc(1024*1024).toString('base64')
   const created=await fetch(base+'/products',{method:'POST',headers,body:JSON.stringify({name:'Test',category:'Test',price:100,images:[image,image]})});assert.equal(created.status,201)
   const response=await fetch(base+'/products?view=summary');const text=await response.text();assert.ok(text.length<1000)

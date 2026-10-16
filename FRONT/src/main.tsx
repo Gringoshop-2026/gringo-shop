@@ -1,5 +1,6 @@
 import { lazy, Suspense, useState } from 'react'
 import { createRoot } from 'react-dom/client'
+import { recordVisit } from './services/api'
 import { Analytics } from '@vercel/analytics/react'
 import BuyerPage from './pages/Buyer/BuyerPage'
 const AdminPage = lazy(() => import('./pages/Admin/AdminPage'))
@@ -11,3 +12,5 @@ function Root(){return <LanguageProvider><Suspense fallback={<main role="status"
 const root = import.meta.hot?.data.root ?? createRoot(document.getElementById('root')!)
 if (import.meta.hot) import.meta.hot.data.root = root
 root.render(<Root />)
+
+if (!import.meta.hot) recordVisit()

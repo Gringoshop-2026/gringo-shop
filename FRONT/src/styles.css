@@ -435,3 +435,21 @@ h1,h2,h3 { text-wrap:balance; }
 .payment-methods img.payment-visa { width:52px; height:17px; }
 .payment-methods .payment-credit { gap:8px; color:var(--ink); font-size:12px; font-weight:600; }
 .payment-credit span { max-width:60px; line-height:1.3; }
+.visit-tools { display:flex; align-items:center; gap:10px; }
+.visit-tools select { min-height:40px; padding:8px 12px; border:1px solid var(--line); border-radius:8px; background:white; font:inherit; font-size:13px; }
+.visit-tools button { display:grid; place-items:center; width:40px; height:40px; border:1px solid var(--line); border-radius:8px; background:white; cursor:pointer; color:var(--ink); }
+.visit-body { padding:24px; }
+.visit-totals { display:flex; flex-wrap:wrap; gap:32px 64px; margin:0 0 18px; }
+.visit-totals dt { font-size:13px; color:var(--muted); }
+.visit-totals dd { margin:6px 0 0; font-size:36px; font-weight:600; letter-spacing:-.03em; font-variant-numeric:tabular-nums; }
+.visit-explanation { color:var(--muted); font-size:12px; line-height:1.7; max-width:75ch; margin:12px 0 24px; }
+.visit-body h3 { font-size:15px; margin:24px 0 12px; }
+.visit-table { width:100%; border-collapse:collapse; font-size:12px; font-variant-numeric:tabular-nums; }
+.visit-table th,.visit-table td { padding:10px 8px; border-bottom:1px solid var(--line); text-align:right; }
+.visit-table th:first-child { text-align:left; white-space:nowrap; font-weight:500; }
+.visit-table thead th { color:var(--muted); font-weight:500; }
+.visit-table td:nth-child(2) { width:48%; }
+.visit-bar { display:block; height:10px; background:#edf0f2; border-radius:3px; overflow:hidden; }
+.visit-bar>span { display:block; height:100%; background:var(--accent); border-radius:3px; }
+.visit-footer { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; padding:20px 24px; background:#f8f9fa; font-size:12px; color:var(--muted); }
+@media(max-width:640px) { .visit-statistics .admin-panel-heading { flex-direction:column; gap:16px; } .visit-body { padding:20px 16px; } .visit-table td:nth-child(2) { width:30%; } .visit-footer { padding:20px 16px; } }
