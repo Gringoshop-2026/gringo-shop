@@ -44,7 +44,7 @@ export async function createOrder(payload: { productId?: string; productName: st
 
 export async function getVisitStats(days:number) {
   const response=await adminFetch(`${API_URL}/analytics?days=${days}`,{headers:adminHeaders(),signal:AbortSignal.timeout(15000)})
-  if(!response.ok)throw new Error('No pudimos cargar las estadísticas. Intenta nuevamente.')
+  if(!response.ok){const result=await response.json();throw new Error(result.error||'No pudimos cargar las estadísticas. Intenta nuevamente.')}
   return response.json()
 }
 export function recordVisit() {

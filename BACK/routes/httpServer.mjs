@@ -1,3 +1,4 @@
+import { vercelStats } from '../application/analytics/VercelStats.mjs'
 import { visitStats } from '../application/analytics/VisitStats.mjs'
 import { deliverProduct, productPhotos, decodeProductPhoto, photoVersion } from '../application/catalog/DeliverCatalog.mjs'
 import http from 'node:http'
@@ -27,6 +28,7 @@ mkdirSync(dataDir, { recursive: true })
 const sqlite = new DatabaseSync(sqliteFile)
 sqlite.exec('CREATE TABLE IF NOT EXISTS products (id TEXT PRIMARY KEY, data TEXT NOT NULL); CREATE TABLE IF NOT EXISTS orders (id TEXT PRIMARY KEY, data TEXT NOT NULL); CREATE TABLE IF NOT EXISTS quotes (id TEXT PRIMARY KEY, data TEXT NOT NULL); CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT NOT NULL); CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY, username TEXT UNIQUE NOT NULL, password_hash TEXT NOT NULL, role TEXT NOT NULL DEFAULT \'admin\', active INTEGER NOT NULL DEFAULT 1, created_at TEXT NOT NULL);')
 const stats = visitStats(sqlite)
+const readVercelStats = process.env.VERCEL_ANALYTICS_TOKEN ? vercelStats({token:process.env.VERCEL_ANALYTICS_TOKEN,projectId:process.env.VERCEL_ANALYTICS_PROJECT_ID||'prj_pORmmNDVwmjQM3k107oHpvneNa9k',teamId:process.env.VERCEL_ANALYTICS_TEAM_ID||'team_g6nWmXeRxi35wHgtnXpTMgrS'}) : null
 function hashPassword(password) { const salt=randomUUID(); return `${salt}:${scryptSync(password,salt,64).toString('hex')}` }
 function verifyPassword(password, stored) { const [salt,hash]=stored.split(':'); if(!salt||!hash)return false; const actual=scryptSync(password,salt,64); const expected=Buffer.from(hash,'hex'); return actual.length===expected.length&&timingSafeEqual(actual,expected) }
 if (!sqlite.prepare('SELECT id FROM users LIMIT 1').get()) sqlite.prepare('INSERT INTO users (id,username,password_hash,role,created_at) VALUES (?,?,?,?,?)').run(randomUUID(), process.env.ADMIN_USER || 'admin', hashPassword(process.env.ADMIN_PASSWORD || 'negro2026'), 'admin', new Date().toISOString())
@@ -74,7 +76,11 @@ const server = http.createServer(async (req, res) => {
       if(!stats.record(input.visitor))return json(res,400,{error:'Visita inválida.'})
       return json(res,202,{ok:true})
     }
-    if (req.method === 'GET' && url.pathname === '/api/analytics') return json(res,200,stats.read(url.searchParams.get('days')==='30'?30:7))
+    if (req.method === 'GET' && url.pathname === '/api/analytics') {
+      const days=url.searchParams.get('days')==='30'?30:7
+      if(readVercelStats){try{return json(res,200,await readVercelStats(days))}catch(error){return json(res,502,{error:error.message})}}
+      return json(res,200,{...stats.read(days),source:'local'})
+    }
     if (req.method === 'GET' && url.pathname === '/api/backup') { res.writeHead(200, { 'content-type':'application/x-sqlite3', 'content-disposition':`attachment; filename="negroshop-${new Date().toISOString().slice(0,10)}.sqlite`, 'access-control-allow-origin':'*', 'access-control-allow-headers':'content-type, authorization' }); return res.end(readFileSync(sqliteFile)) }
     if (url.pathname === '/api/settings' && req.method === 'PATCH' && adminSession(req)?.role !== 'admin') return json(res, 403, { error: 'Solo un administrador puede cambiar la configuración.' })
     if (req.method === 'PATCH' && url.pathname === '/api/me/password') { const input=await body(req); const session=adminSession(req); const current=sqlite.prepare('SELECT password_hash FROM users WHERE id=? AND active=1').get(session.userId); if(!current||!verifyPassword(String(input.currentPassword||''),current.password_hash)) return json(res,400,{error:'La contraseña actual no es correcta.'}); if(String(input.newPassword||'').length<8)return json(res,400,{error:'La nueva contraseña debe tener al menos 8 caracteres.'}); sqlite.prepare('UPDATE users SET password_hash=? WHERE id=?').run(hashPassword(String(input.newPassword)),session.userId); adminSessions.clear(); return json(res,200,{ok:true}) }
