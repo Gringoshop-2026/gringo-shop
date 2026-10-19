@@ -1,3 +1,5 @@
+import { convertPrice } from '../../utils/currency'
+import { getExchangeRate } from '../../services/api'
 import { shopWhatsappUrl } from '../../utils/whatsapp'
 import { useEffect, useMemo, useState } from 'react'
 import { ArrowRight, Heart, MessageCircle, Package, Search, ShoppingBag } from 'lucide-react'
@@ -37,6 +39,16 @@ export default function BuyerPage() {
   const [settings, setSettings] = useState(initialSettings)
   const [categoryOptions, setCategoryOptions] = useState<string[]>([])
   const [reload, setReload] = useState(0)
+  const [currency,setCurrency]=useState(()=>{try{return localStorage.getItem('negroshop-currency')==='USD'?'USD':'PEN'}catch{return 'PEN'}})
+  const [rate,setRate]=useState<{rate:number;date:string;stale:boolean}|null>(null)
+  const [rateError,setRateError]=useState(false)
+  useEffect(()=>{let live=true;const refresh=()=>getExchangeRate().then(value=>{if(live){setRate(value);setRateError(false)}}).catch(()=>{if(live)setRateError(true)});void refresh();const timer=window.setInterval(()=>void refresh(),3600000);return()=>{live=false;window.clearInterval(timer)}},[])
+  const base=settings.currency==='USD'?'USD':'PEN'
+  const usableRate=rate&&Date.now()-Date.parse(rate.date+'T00:00:00Z')<7*86400000?rate:null
+  const displayedCurrency=currency===base||usableRate?currency:base
+  const displayProduct=(product:Product):Product=>({...product,price:convertPrice(product.price,base,displayedCurrency,usableRate?.rate||1),referencePrice:convertPrice(product.referencePrice,base,displayedCurrency,usableRate?.rate||1),currencySymbol:displayedCurrency==='USD'?'US$':'S/'})
+  const changeCurrency=(value:string)=>{setCurrency(value);try{localStorage.setItem('negroshop-currency',value)}catch{}}
+
 
   useEffect(() => {
     let cancelled = false
@@ -70,26 +82,27 @@ export default function BuyerPage() {
   const reserveHref = (product: Product) => shopWhatsappUrl(settings.whatsapp, `Hola, quiero reservar este producto en NegroShop: ${product.name}. Precio: ${product.currencySymbol} ${money(product.price)}. ¿Me ayudan con la compra?`)
   return <div className="storefront">
     <a className="skip-link" href="#catalogo">Ir al catálogo</a>
-    <div className="announcement">De Estados Unidos a tus manos <span>· Precios en {settings.currency === 'USD' ? 'dólares' : 'soles'}</span></div>
+    <div className="announcement">De Estados Unidos a tus manos <span>· Precios en {displayedCurrency === 'USD' ? 'dólares' : 'soles'}</span></div>
     <header className="store-header"><div className="store-header-inner">
       <a href="/" className="wordmark" aria-label="NegroShop, inicio"><ShoppingBag size={23} strokeWidth={1.8} /><b>NEGRO<span>SHOP</span></b></a>
       <nav aria-label="Navegación principal"><a href="#catalogo">Catálogo</a><a href="#como">Cómo funciona</a><a href="#contacto">Contacto</a></nav>
-      <div className="header-actions"><a className="quote-button" href={quoteHref} target="_blank" rel="noreferrer"><MessageCircle size={16} /><span>Cotizar</span></a><LanguageSwitcher /></div>
+      <div className="header-actions"><a className="quote-button" href={quoteHref} target="_blank" rel="noreferrer"><MessageCircle size={16} /><span>Cotizar</span></a><label className="currency-selector"><span className="sr-only">Moneda de los precios</span><select aria-label="Moneda de los precios" value={displayedCurrency} onChange={e=>changeCurrency(e.target.value)}><option value="PEN" disabled={base!=='PEN'&&!usableRate}>S/ PEN</option><option value="USD" disabled={base!=='USD'&&!usableRate}>US$ USD</option></select></label><LanguageSwitcher /></div>
     </div></header>
     <main className="store-main">
       <section className="store-hero"><div className="hero-copy"><h1>Tus marcas favoritas.<br /><span>Más cerca de ti.</span></h1><p>{settings.welcomeMessage}</p><div className="hero-actions"><a className="primary-button" href="#catalogo">Explorar catálogo <ArrowRight size={18} /></a><a className="text-button" href={quoteHref} target="_blank" rel="noreferrer">Cotizar por WhatsApp <ArrowRight size={16} /></a></div></div><div className="hero-reservation"><ShoppingBag size={30} strokeWidth={1.3} /><p>Elige. Reserva. Recibe.</p><h2>Tu próxima compra,<br />más cerca.</h2><p>Reserva tu producto y coordina<br />los detalles por WhatsApp.</p><a href="#como">Así funciona <ArrowRight size={16} /></a></div></section>
       <InstallmentNotice whatsapp={settings.whatsapp} />
       <section id="catalogo" className="catalog-section" aria-labelledby="catalog-title"><div className="catalog-heading"><div><h2 id="catalog-title">Encuentra tu próximo favorito</h2><p>Explora nuestras marcas y productos.</p></div><label className="catalog-search"><Search size={18} /><span className="sr-only">Buscar en el catálogo</span><input type="search" value={query} onChange={e => setQuery(e.target.value)} placeholder="Buscar producto, marca…" /></label></div>
+        <p className="exchange-notice" role="status">{usableRate?<>Tipo de cambio referencial: US$ 1 = S/ {usableRate.rate.toFixed(4)} · {new Date(usableRate.date+'T12:00:00Z').toLocaleDateString('es-PE')}{usableRate.stale||rateError?' · Última tasa disponible':''}{displayedCurrency!==base?' · Confirma el importe final por WhatsApp.':''}</>:rateError?'La conversión no está disponible por ahora. Mostramos la moneda original.':'Consultando tipo de cambio…'}</p>
         <div className="catalog-toolbar"><div className="category-list" aria-label="Filtrar por categoría">{categories.map(category => <button key={category} aria-pressed={active === category} className={active === category ? 'active' : ''} onClick={() => setActive(category)}>{category}</button>)}</div><span className="catalog-count" role="status">{loading ? 'Cargando catálogo…' : `${filtered.length} ${filtered.length === 1 ? 'producto' : 'productos'}`}</span></div>
         {error && <div role="alert" className="error-message"><p>{error}</p><button onClick={() => setReload(value => value + 1)}>Reintentar</button></div>}
-        <div className="catalog-grid" aria-busy={loading}>{loading ? [1, 2, 3].map(i => <div key={i} className="catalog-skeleton" />) : filtered.map(p => <Card key={p.id} product={p} onView={setDetail} reserveHref={reserveHref(p)} />)}</div>
+        <div className="catalog-grid" aria-busy={loading}>{loading ? [1, 2, 3].map(i => <div key={i} className="catalog-skeleton" />) : filtered.map(displayProduct).map(p => <Card key={p.id} product={p} onView={product=>setDetail(catalog.find(p=>p.id===product.id)||null)} reserveHref={reserveHref(p)} />)}</div>
         {!loading && !error && filtered.length === 0 && <div className="empty-catalog"><Search size={28} /><h3>{catalog.length ? 'No encontramos coincidencias' : 'Pronto habrá nuevos productos'}</h3><p>{catalog.length ? 'Prueba con otra marca o categoría.' : 'Mientras tanto, envíanos el enlace del producto que buscas.'}</p>{catalog.length > 0 && <button className="text-button" onClick={() => { setQuery(''); setActive('Todos') }}>Ver todos los productos <ArrowRight size={16} /></button>}</div>}
-        <div className="quote-banner"><div><h2>¿Buscas algo más?</h2><p>Envíanos el enlace de la tienda y solicita una cotización en {settings.currency === 'USD' ? 'dólares' : 'soles'}.</p></div><a className="primary-button" href={quoteHref} target="_blank" rel="noreferrer">Cotizar por WhatsApp <ArrowRight size={17} /></a></div>
+        <div className="quote-banner"><div><h2>¿Buscas algo más?</h2><p>Envíanos el enlace de la tienda y solicita una cotización en {displayedCurrency === 'USD' ? 'dólares' : 'soles'}.</p></div><a className="primary-button" href={quoteHref} target="_blank" rel="noreferrer">Cotizar por WhatsApp <ArrowRight size={17} /></a></div>
       </section>
       <section id="como" className="how-section"><h2>De la tienda a tus manos</h2><div className="how-steps">{[['1', 'Elige tu producto', 'Encuéntralo en el catálogo o envíanos el enlace de la tienda.'], ['2', 'Coordina tu reserva', 'Escríbenos por WhatsApp y coordinamos tu compra.'], ['3', 'Recibe tu producto', 'Te acompañamos hasta la entrega de tu compra.']].map(([number, title, description]) => <div className="how-step" key={number}><span>{number}</span><div><h3>{title}</h3><p>{description}</p></div></div>)}</div></section>
       <section id="contacto" className="quote-banner"><div><h2>Hablemos por WhatsApp</h2><p>Consulta por un producto, tu compra o las opciones de pago.</p></div>{quoteHref?<a className="primary-button" href={shopWhatsappUrl(settings.whatsapp,'Hola, tengo una consulta sobre NegroShop.')} target="_blank" rel="noreferrer"><MessageCircle size={17}/>Escribir por WhatsApp</a>:<p role="status">El contacto por WhatsApp estará disponible pronto.</p>}</section>
     </main>
     <footer className="store-footer"><a className="wordmark" href="/">NEGRO<span>SHOP</span></a><p>Compra directo de tiendas de Estados Unidos.</p><a href="#catalogo">Volver al catálogo <ArrowRight size={15} /></a></footer>
-    {detail && <ProductDetail product={detail} whatsapp={settings.whatsapp} onClose={() => setDetail(null)} reserveHref={reserveHref(detail)} />}
+    {detail && <ProductDetail product={displayProduct(catalog.find(p=>p.id===detail.id)||detail)} whatsapp={settings.whatsapp} onClose={() => setDetail(null)} reserveHref={reserveHref(displayProduct(catalog.find(p=>p.id===detail.id)||detail))} />}
   </div>
 }

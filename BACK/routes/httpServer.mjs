@@ -1,3 +1,4 @@
+import { exchangeRate } from '../application/catalog/ExchangeRate.mjs'
 import { preserveProductPhotos } from '../application/catalog/PreserveProductPhotos.mjs'
 import { vercelStats } from '../application/analytics/VercelStats.mjs'
 import { visitStats } from '../application/analytics/VisitStats.mjs'
@@ -28,6 +29,7 @@ const seed = { products: [], quotes: [], orders: [], settings: { reservationPerc
 mkdirSync(dataDir, { recursive: true })
 const sqlite = new DatabaseSync(sqliteFile)
 sqlite.exec('CREATE TABLE IF NOT EXISTS products (id TEXT PRIMARY KEY, data TEXT NOT NULL); CREATE TABLE IF NOT EXISTS orders (id TEXT PRIMARY KEY, data TEXT NOT NULL); CREATE TABLE IF NOT EXISTS quotes (id TEXT PRIMARY KEY, data TEXT NOT NULL); CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT NOT NULL); CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY, username TEXT UNIQUE NOT NULL, password_hash TEXT NOT NULL, role TEXT NOT NULL DEFAULT \'admin\', active INTEGER NOT NULL DEFAULT 1, created_at TEXT NOT NULL);')
+const readExchangeRate = exchangeRate(sqlite)
 const stats = visitStats(sqlite)
 const readVercelStats = process.env.VERCEL_ANALYTICS_TOKEN ? vercelStats({token:process.env.VERCEL_ANALYTICS_TOKEN,projectId:process.env.VERCEL_ANALYTICS_PROJECT_ID||'prj_pORmmNDVwmjQM3k107oHpvneNa9k',teamId:process.env.VERCEL_ANALYTICS_TEAM_ID||'team_g6nWmXeRxi35wHgtnXpTMgrS'}) : null
 function hashPassword(password) { const salt=randomUUID(); return `${salt}:${scryptSync(password,salt,64).toString('hex')}` }
@@ -116,6 +118,7 @@ const server = http.createServer(async (req, res) => {
       if(req.headers['if-none-match']===headers.etag){res.writeHead(304,headers);return res.end()}
       res.writeHead(200,headers);return res.end(decoded.bytes)
     }
+    if(req.method==='GET'&&url.pathname==='/api/exchange-rate'){try{return json(res,200,await readExchangeRate())}catch(error){return json(res,503,{error:error.message})}}
     if (req.method === 'GET' && url.pathname === '/api/health') return json(res, 200, { ok: true, service: 'negroshop-back' })
     if (req.method === 'GET' && url.pathname === '/api/settings') return json(res, 200, { ...seed.settings, ...(data.settings || {}) })
     if (req.method === 'PATCH' && url.pathname === '/api/settings') { const input = await body(req); const current = { ...seed.settings, ...(data.settings || {}) }; const next = { ...current, reservationPercent: Number(input.reservationPercent ?? current.reservationPercent), whatsapp: String(input.whatsapp ?? current.whatsapp).replace(/\D/g, '').slice(0, 9), currency: String(input.currency ?? current.currency), welcomeMessage: String(input.welcomeMessage ?? current.welcomeMessage).trim() }; if (next.reservationPercent < 1 || next.reservationPercent > 100) return json(res, 400, { error: 'El adelanto debe estar entre 1 y 100.' }); if (next.whatsapp && !/^9\d{8}$/.test(next.whatsapp)) return json(res, 400, { error: 'El WhatsApp debe tener 9 dígitos y comenzar con 9.' }); data.settings = next; await save(data); return json(res, 200, next) }

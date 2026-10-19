@@ -56,3 +56,5 @@ export function recordVisit() {
     void fetch(`${API_URL}/visits`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({visitor}),keepalive:true}).catch(()=>{})
   } catch { /* Browsing still works when storage is blocked. */ }
 }
+
+export async function getExchangeRate(){const response=await fetch(`${API_URL}/exchange-rate`,{signal:AbortSignal.timeout(10000)});if(!response.ok)throw Error('Tipo de cambio no disponible');return response.json()}
