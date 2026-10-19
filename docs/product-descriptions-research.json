@@ -1,0 +1,193 @@
+{
+  "researchedAt": "2026-10-19",
+  "products": [
+    {
+      "id": "7f47f03b-e4b5-460a-a0cd-0ba9c2b5f479",
+      "name": "BGOMEZ Satchel",
+      "description": "Bolso tipo satchel de Steve Madden, con asas superiores y silueta estructurada. Su diseño combina detalles metálicos y un acabado con textura para acompañar tus looks de todos los días.",
+      "sources": [
+        "https://stevemadden.me/products/bgomez-multi-womens-satchel-bag-multi"
+      ],
+      "notes": "Modelo confirmado; detalles visuales de la variante publicada."
+    },
+    {
+      "id": "7c81e15e-d677-4509-bfdb-e0f59284eef3",
+      "name": "Billetera Guess",
+      "description": "Billetera plegable negra de Guess, con logo grabado y costuras a tono. Un diseño discreto y fácil de combinar para llevar tus esenciales.",
+      "sources": [],
+      "notes": "Descripción visual: no hay código de modelo para confirmar material o distribución interior."
+    },
+    {
+      "id": "6733af55-bd47-42fc-a1ce-5be3ad42a97e",
+      "name": "Odyssey Homme",
+      "description": "Fragancia ambarada que combina mandarina, neroli y cardamomo con un corazón floral. La vainilla, el sándalo y el ámbar aportan un fondo cálido y envolvente.",
+      "sources": [
+        "https://armaf.com/products/odyssey-homme-man"
+      ],
+      "notes": "Ficha del fabricante."
+    },
+    {
+      "id": "35e44bc1-fe6a-47fc-a051-c49fedf0caff",
+      "name": "Assad Elixir",
+      "description": "Aroma especiado y amaderado con pimienta rosa, azafrán y pomelo. El tabaco y el cedro se suavizan con vainilla sobre un fondo de pachulí, incienso y ámbar seco.",
+      "sources": [
+        "https://www.lattafa-usa.com/products/asad-elixir"
+      ],
+      "notes": "Ficha del fabricante."
+    },
+    {
+      "id": "d8b80491-04c4-4cbd-9ab2-fe2a19f167fb",
+      "name": "Hawas Chrome edp",
+      "description": "Fragancia frutal de perfil tropical: durazno y naranja dulce dan paso a mango y maracuyá. Su fondo de almizcle, ámbar y vainilla añade un toque cálido y dulce.",
+      "sources": [
+        "https://basenotes.com/fragrances/hawas-chrome-by-rasasi.26295016"
+      ],
+      "notes": "Fuente especializada; notas contrastadas con Fragrantica."
+    },
+    {
+      "id": "0314db54-a961-4861-8030-5b5196ea0642",
+      "name": "Asad Zanzibar",
+      "description": "Una mezcla de pimienta negra y lavanda marina con agua de coco salada e iris. La vainilla y el incienso completan un aroma cremoso con matices especiados.",
+      "sources": [
+        "https://lattafa.com/product/asad-zanzibar/"
+      ],
+      "notes": "Ficha del fabricante."
+    },
+    {
+      "id": "65815387-3c7e-4475-a5ff-fcb2380e45b0",
+      "name": "Xlnc Imperium 200ml",
+      "description": "Perfume cálido y especiado que abre con coñac, canela y ciruela. El iris y la mirra se funden con un fondo cremoso de vainilla, haba tonka y sándalo.",
+      "sources": [
+        "https://www.parfumo.com/Perfumes/nayaat/imperium"
+      ],
+      "notes": "Fuente especializada; notas contrastadas con Fragrantica."
+    },
+    {
+      "id": "65be5aa4-39f9-476e-870b-48863ce63b45",
+      "name": "Khamrah Dukhan",
+      "description": "Fragancia de carácter ahumado con mandarina, pimiento y especias. El incienso y el pachulí se apoyan en un fondo de tabaco, ámbar, haba tonka y praliné.",
+      "sources": [
+        "https://lattafa.com/product/khamrah-dukhan/"
+      ],
+      "notes": "Ficha del fabricante."
+    },
+    {
+      "id": "a09dc08d-0482-4469-bbe5-52d929180711",
+      "name": "Qaed al fursan",
+      "description": "Aroma frutal y amaderado que destaca por la piña y el azafrán. El jazmín y el bálsamo de abeto se combinan con un fondo de oud, cedro y ámbar.",
+      "sources": [
+        "https://lattafa.com/product/qaed-al-fursan/"
+      ],
+      "notes": "Ficha del fabricante."
+    },
+    {
+      "id": "26305065-3ac5-414e-94b8-55e86a9dfd02",
+      "name": "Drug Extradose",
+      "description": "Fragancia amaderada y acuática con una apertura de mandarina y notas marinas. El pomelo y el pachulí aportan contraste sobre un fondo de madera de guayaco y musgo de roble.",
+      "sources": [
+        "https://www.fragrantica.com/perfume/Fragrance-Story/Drug-Extradose-132336.html"
+      ],
+      "notes": "Fuente especializada; notas contrastadas con Fragsi."
+    },
+    {
+      "id": "8b65fc38-6edc-4f18-936f-23c7c4febc9c",
+      "name": "Odyssey Mandarin Sky elixir",
+      "description": "Fragancia cítrica y dulce con mandarina, naranja, salvia y azafrán. El caramelo y el haba tonka se equilibran con vetiver, cedro y ambroxan para un acabado cálido y amaderado.",
+      "sources": [
+        "https://armaf.com/products/odyssey-mandarin-sky-elixir"
+      ],
+      "notes": "Ficha del fabricante."
+    },
+    {
+      "id": "2a99d67f-80fa-4b12-97ed-f78477246140",
+      "name": "Stronger With You EDT",
+      "description": "Eau de toilette cálida y especiada con notas de cardamomo y castaña. Su perfil combina dulzura y calidez para quienes disfrutan los aromas con un toque gourmand.",
+      "sources": [
+        "https://www.giorgioarmanibeauty-usa.com/fragrances/view-all-fragrances/stronger-with-you-eau-de-toilette/3605522040281.html"
+      ],
+      "notes": "Ficha del fabricante."
+    },
+    {
+      "id": "12436df5-efb6-4acc-aa56-f95d5655accb",
+      "name": "Le Male EDT",
+      "description": "El clásico de Jean Paul Gaultier combina la frescura de la menta con lavanda y vainilla. Una eau de toilette que equilibra notas aromáticas y un fondo suave y cálido.",
+      "sources": [
+        "https://www.jeanpaulgaultier.com/ww/en/fragrances/range-le-male/le-male-eau-de-toilette"
+      ],
+      "notes": "Ficha del fabricante."
+    },
+    {
+      "id": "16ca8603-dcd6-4b37-81ab-b6bdfb2a9a79",
+      "name": "Game Of Spade Unisex Royale",
+      "description": "Fragancia dulce y amaderada con avellana y cacao en la salida. El jazmín y el cedro dan paso a un fondo de caramelo, ambroxan y musgo.",
+      "sources": [
+        "https://jomilanoparis.com/products/game-of-spades-royale"
+      ],
+      "notes": "Ficha del fabricante."
+    },
+    {
+      "id": "008c131e-4b77-4038-8d41-8db9928d4728",
+      "name": "Game Of Spades No Limit",
+      "description": "Aroma amaderado con romero y mandarina siciliana. Su corazón reúne café, coco, iris y chocolate con leche, sobre una base de oud y haba tonka.",
+      "sources": [
+        "https://jomilanoparis.com/products/game-of-spades-no-limit"
+      ],
+      "notes": "Ficha del fabricante."
+    },
+    {
+      "id": "b2c6b9c9-ef98-4e29-bd14-730d3f72682d",
+      "name": "Invicta Specialty",
+      "description": "Reloj analógico Invicta Specialty con esfera azul y brazalete de acabado bicolor. Los detalles dorados y el bisel numerado le dan una presencia marcada en la muñeca.",
+      "sources": [],
+      "notes": "Descripción visual; sin número de referencia no se atribuyen movimiento, materiales ni resistencia al agua."
+    },
+    {
+      "id": "647704e7-a38b-4e93-a79c-f99780e10cc0",
+      "name": "CrossBody",
+      "description": "Bolso Nanette Lepore en tono beige, con estampado de monograma, cierre superior y cadena decorativa dorada. Un accesorio que suma textura y contraste a tus combinaciones.",
+      "sources": [],
+      "notes": "Descripción visual; no se presume material ni correa no visible."
+    },
+    {
+      "id": "46ff0334-a9c0-41f9-81b4-4953889d3b0e",
+      "name": "Cartera",
+      "description": "Cartera negra de Steve Madden con doble asa, forma estructurada y cierre superior. La cadena frontal y los detalles dorados aportan contraste a su diseño clásico.",
+      "sources": [],
+      "notes": "Descripción visual; no hay código de modelo."
+    },
+    {
+      "id": "b221fdf7-ddd6-4948-8e2c-0664eb0efec8",
+      "name": "Top Handle Flap Bag",
+      "description": "Bolso Guess de asa superior y solapa, en tono borgoña. El emblema triangular y los detalles dorados completan una silueta compacta y estructurada.",
+      "sources": [],
+      "notes": "Descripción visual; no hay código de modelo."
+    },
+    {
+      "id": "8e9f5200-466b-4899-b704-a24c654128ca",
+      "name": "Body Scrub Crushed Macadamia & Rice Milk 298 g",
+      "description": "Exfoliante corporal cremoso con aroma de macadamia y leche de arroz. Ayuda a retirar células muertas y deja la piel con una sensación suave y nutrida.",
+      "sources": [
+        "https://www.dove.com/uk/p/crushed-macadamia-rice-milk-body-scrub.sm.html/08710447217054"
+      ],
+      "notes": "No se trasladan medidas de otra presentación."
+    },
+    {
+      "id": "08d17cfe-ee4b-487a-8ff9-79ea7f9ea64b",
+      "name": "Body Scrub Winter Berry Holiday Treats 298 g",
+      "description": "Exfoliante corporal de la colección Holiday Treats, con aroma a frutos rojos y textura cremosa. Diseñado para exfoliar la piel y dejarla con una sensación suave.",
+      "sources": [
+        "https://business.walmart.com/ip/Dove-Limited-Edition-Holiday-Treats-Winter-Berry-Body-Scrub-15-oz/20000511902"
+      ],
+      "notes": "Variante Winter Berry confirmada; no se traslada el tamaño de otra presentación."
+    },
+    {
+      "id": "4d22b5c9-3488-44a5-a5e2-5a0ce4c935fa",
+      "name": "Body Scrub White Peach & Crushed Rice 298 g",
+      "description": "Exfoliante corporal con aroma a durazno blanco y arroz triturado. Su fórmula cremosa ayuda a retirar células muertas y a dejar la piel suave y nutrida.",
+      "sources": [
+        "https://www.dove.com/us/en/p/white-peach-%26-crushed-rice-body-scrub.html/00011111054691"
+      ],
+      "notes": "Ficha del fabricante."
+    }
+  ]
+}

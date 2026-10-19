@@ -457,3 +457,7 @@ h1,h2,h3 { text-wrap:balance; }
 .currency-selector select { font:inherit; color:inherit; background:transparent; border:0; border-radius:0; padding:9px 4px; min-height:38px; cursor:pointer; }
 .exchange-notice { margin:18px 0 0; font-size:12px; line-height:1.7; color:var(--muted); max-width:75ch; }
 @media(max-width:640px) { .header-actions { gap:8px; } .currency-selector select { padding:9px 4px; font-size:11px; } }
+.product-description { padding:28px 32px 32px; }
+.product-description h3 { font-family:'DM Sans',sans-serif; font-size:16px; line-height:1.4; font-weight:600; color:var(--ink); margin:0 0 10px; }
+.product-description p { font-size:14px; line-height:1.8; color:var(--muted); max-width:60ch; margin:0; }
+@media(max-width:640px) { .product-description { padding:22px 24px 28px; } }

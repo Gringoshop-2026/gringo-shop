@@ -8,7 +8,7 @@ import ProductDetail from '../../components/ProductDetail'
 import InstallmentNotice from '../../components/InstallmentNotice'
 import { LanguageSwitcher } from '../../i18n'
 
-export type Product = { id: string; name: string; brand: string; category: string; price: number; referencePrice: number; art: string; tag: string; currencySymbol?: string; image?: string; images?: string[]; active?: boolean }
+export type Product = { id: string; description?: string; name: string; brand: string; category: string; price: number; referencePrice: number; art: string; tag: string; currencySymbol?: string; image?: string; images?: string[]; active?: boolean }
 export const money = (value: number) => value.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 const initialSettings = { whatsapp: '', currency: 'PEN', welcomeMessage: 'Compra directo de tiendas de Estados Unidos.' }
 
