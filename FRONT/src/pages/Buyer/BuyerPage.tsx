@@ -2,7 +2,7 @@ import { convertPrice } from '../../utils/currency'
 import { getExchangeRate } from '../../services/api'
 import { shopWhatsappUrl } from '../../utils/whatsapp'
 import { useEffect, useMemo, useState } from 'react'
-import { ArrowRight, Heart, MessageCircle, Package, Search, ShoppingBag } from 'lucide-react'
+import { ArrowRight, Coins, Heart, MessageCircle, Package, Search, ShoppingBag } from 'lucide-react'
 import { getCategories, getProducts, getSettings } from '../../services/api'
 import ProductDetail from '../../components/ProductDetail'
 import InstallmentNotice from '../../components/InstallmentNotice'
@@ -86,7 +86,7 @@ export default function BuyerPage() {
     <header className="store-header"><div className="store-header-inner">
       <a href="/" className="wordmark" aria-label="NegroShop, inicio"><ShoppingBag size={23} strokeWidth={1.8} /><b>NEGRO<span>SHOP</span></b></a>
       <nav aria-label="Navegación principal"><a href="#catalogo">Catálogo</a><a href="#como">Cómo funciona</a><a href="#contacto">Contacto</a></nav>
-      <div className="header-actions"><a className="quote-button" href={quoteHref} target="_blank" rel="noreferrer"><MessageCircle size={16} /><span>Cotizar</span></a><label className="currency-selector"><span className="sr-only">Moneda de los precios</span><select aria-label="Moneda de los precios" value={displayedCurrency} onChange={e=>changeCurrency(e.target.value)}><option value="PEN" disabled={base!=='PEN'&&!usableRate}>S/ PEN</option><option value="USD" disabled={base!=='USD'&&!usableRate}>US$ USD</option></select></label><LanguageSwitcher /></div>
+      <div className="header-actions"><a className="quote-button" href={quoteHref} target="_blank" rel="noreferrer"><MessageCircle size={16} /><span>Cotizar</span></a><label className="currency-selector"><Coins size={15} aria-hidden="true"/><span className="sr-only">Moneda de los precios</span><select aria-label="Moneda de los precios" value={displayedCurrency} onChange={e=>changeCurrency(e.target.value)}><option value="PEN" disabled={base!=='PEN'&&!usableRate}>Soles</option><option value="USD" disabled={base!=='USD'&&!usableRate}>Dólares</option></select></label><LanguageSwitcher /></div>
     </div></header>
     <main className="store-main">
       <section className="store-hero"><div className="hero-copy"><h1>Tus marcas favoritas.<br /><span>Más cerca de ti.</span></h1><p>{settings.welcomeMessage}</p><div className="hero-actions"><a className="primary-button" href="#catalogo">Explorar catálogo <ArrowRight size={18} /></a><a className="text-button" href={quoteHref} target="_blank" rel="noreferrer">Cotizar por WhatsApp <ArrowRight size={16} /></a></div></div><div className="hero-reservation"><ShoppingBag size={30} strokeWidth={1.3} /><p>Elige. Reserva. Recibe.</p><h2>Tu próxima compra,<br />más cerca.</h2><p>Reserva tu producto y coordina<br />los detalles por WhatsApp.</p><a href="#como">Así funciona <ArrowRight size={16} /></a></div></section>
